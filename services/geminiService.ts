@@ -57,10 +57,10 @@ export const convertImageToLatex = async (base64Images: string[]): Promise<strin
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
-    systemInstruction: SYSTEM_INSTRUCTION,
-  });
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-1.5-flash-latest",
+  systemInstruction: SYSTEM_INSTRUCTION,
+});
 
   try {
     const imageParts = base64Images.map(img => {
