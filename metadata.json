@@ -1,0 +1,7 @@
+{
+  "name": "LaTeX Exam Converter (BGD 2025)",
+  "description": "Ứng dụng chuyển đổi file PDF và hình ảnh đề thi sang cấu trúc LaTeX ex-test theo định dạng 3 phần của Bộ Giáo dục & Đào tạo Việt Nam 2025.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
