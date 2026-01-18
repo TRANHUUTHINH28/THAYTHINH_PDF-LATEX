@@ -51,7 +51,7 @@ Yêu cầu định dạng đặc biệt:
 `;
 
 export const convertImageToLatex = async (base64Images: string[]): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
   
   const contents = base64Images.map(img => ({
     inlineData: {
