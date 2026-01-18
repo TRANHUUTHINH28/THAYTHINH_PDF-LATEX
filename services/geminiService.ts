@@ -53,13 +53,11 @@ export const convertImageToLatex = async (base64Images: string[]): Promise<strin
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   
   if (!apiKey) {
-    throw new Error('VITE_GEMINI_API_KEY không được cấu hình. Vui lòng thêm API key vào .env.local hoặc Vercel Environment Variables.');
+    throw new Error('VITE_GEMINI_API_KEY không được cấu hình.');
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ 
-  model: "gemini-pro-vision",
-});
+  const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
 
   try {
     const imageParts = base64Images.map(img => {
@@ -72,23 +70,14 @@ const model = genAI.getGenerativeModel({
       };
     });
 
-    const prompt = "Hãy chuyển toàn bộ nội dung trong (các) hình ảnh này sang LaTeX ex-test theo đúng 3 phần của BGD 2025 như đã hướng dẫn.";
+    const prompt = SYSTEM_INSTRUCTION + "\n\nHãy chuyển toàn bộ nội dung trong (các) hình ảnh này sang LaTeX ex-test theo đúng 3 phần của BGD 2025 như đã hướng dẫn.";
 
     const result = await model.generateContent([prompt, ...imageParts]);
-    const response = result.response;
+    const response = await result.response;
     return response.text();
     
   } catch (error: any) {
-    console.error('Lỗi khi gọi Gemini API:', error);
-    
-    if (error.message?.includes('API key')) {
-      throw new Error('API key không hợp lệ. Vui lòng kiểm tra lại VITE_GEMINI_API_KEY.');
-    } else if (error.message?.includes('quota') || error.message?.includes('RESOURCE_EXHAUSTED')) {
-      throw new Error('Đã vượt quá hạn mức miễn phí. Vui lòng đợi reset hoặc nâng cấp tài khoản.');
-    } else if (error.message?.includes('not found')) {
-      throw new Error('Model không khả dụng. Có thể API key chưa được kích hoạt đúng cách.');
-    } else {
-      throw new Error(`Lỗi Gemini API: ${error.message || 'Lỗi không xác định'}`);
-    }
+    console.error('Lỗi Gemini API:', error);
+    throw new Error(`Lỗi: ${error.message || 'Không xác định'}`);
   }
 };
