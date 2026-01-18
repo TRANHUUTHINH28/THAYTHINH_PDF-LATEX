@@ -63,7 +63,6 @@ export const convertImageToLatex = async (base64Images: string[]): Promise<strin
   });
 
   try {
-    // Chuyển đổi base64 images sang định dạng Gemini
     const imageParts = base64Images.map(img => {
       const base64Data = img.includes(',') ? img.split(',')[1] : img;
       return {
