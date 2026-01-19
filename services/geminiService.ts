@@ -1,4 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
 const SYSTEM_INSTRUCTION = `
 Bạn là một chuyên gia chuyển đổi tài liệu toán học/khoa học sang định dạng LaTeX chuyên nghiệp.
@@ -50,68 +51,30 @@ Yêu cầu định dạng đặc biệt:
 `;
 
 export const convertImageToLatex = async (base64Images: string[]): Promise<string> => {
-  const apiKey = import.meta.env.GEMINI_API_KEY;
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   
-  if (!apiKey) {
-    throw new Error('VITE_GEMINI_API_KEY không được cấu hình.');
-  }
+  const contents = base64Images.map(img => ({
+    inlineData: {
+      mimeType: "image/jpeg",
+      data: img.split(',')[1] || img
+    }
+  }));
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  
-  // Dùng gemini-2.0-flash-exp - model mới nhất hỗ trợ vision
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.0-flash-exp"
+  const response: GenerateContentResponse = await ai.models.generateContent({
+    model: 'gemini-3-pro-preview',
+    contents: [
+      {
+        parts: [
+          ...contents.map(c => ({ inlineData: c.inlineData })),
+          { text: "Hãy chuyển toàn bộ nội dung trong (các) hình ảnh này sang LaTeX ex-test theo đúng 3 phần của BGD 2025 như đã hướng dẫn." }
+        ]
+      }
+    ],
+    config: {
+      systemInstruction: SYSTEM_INSTRUCTION,
+      temperature: 0.1,
+    }
   });
 
-  try {
-    const imageParts = base64Images.map(img => {
-      const base64Data = img.includes(',') ? img.split(',')[1] : img;
-      return {
-        inlineData: {
-          data: base64Data,
-          mimeType: "image/jpeg"
-        }
-      };
-    });
-
-    const prompt = SYSTEM_INSTRUCTION + "\n\nHãy chuyển toàn bộ nội dung trong (các) hình ảnh này sang LaTeX ex-test theo đúng 3 phần của BGD 2025 như đã hướng dẫn.";
-
-    const result = await model.generateContent([prompt, ...imageParts]);
-    const response = result.response;
-    const text = response.text();
-    
-    return text;
-    
-  } catch (error: any) {
-    console.error('Lỗi Gemini API:', error);
-    
-    // Thử fallback sang gemini-1.5-flash nếu 2.0 không được
-    if (error.message?.includes('not found') || error.message?.includes('404')) {
-      try {
-        const fallbackModel = genAI.getGenerativeModel({ 
-          model: "gemini-1.5-flash"
-        });
-        
-        const imageParts = base64Images.map(img => {
-          const base64Data = img.includes(',') ? img.split(',')[1] : img;
-          return {
-            inlineData: {
-              data: base64Data,
-              mimeType: "image/jpeg"
-            }
-          };
-        });
-
-        const prompt = SYSTEM_INSTRUCTION + "\n\nHãy chuyển toàn bộ nội dung trong (các) hình ảnh này sang LaTeX ex-test theo đúng 3 phần của BGD 2025 như đã hướng dẫn.";
-
-        const result = await fallbackModel.generateContent([prompt, ...imageParts]);
-        const response = result.response;
-        return response.text();
-      } catch (fallbackError: any) {
-        throw new Error(`Không thể kết nối với Gemini API. Vui lòng kiểm tra API key: ${fallbackError.message}`);
-      }
-    }
-    
-    throw new Error(`Lỗi Gemini API: ${error.message}`);
-  }
+  return response.text || "";
 };
