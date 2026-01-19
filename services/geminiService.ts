@@ -39,7 +39,7 @@ Cấu trúc yêu cầu:
 3. PHẦN III: Câu hỏi trả lời ngắn.
    - Sử dụng môi trường: 
    \\begin{ex} ... 
-   \\shortant[oly]{đáp án}
+   \\shortans[oly]{đáp án}
    \\loigiai{giải chi tiết}
    \\end{ex}
 
