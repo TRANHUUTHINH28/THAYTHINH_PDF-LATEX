@@ -61,7 +61,7 @@ export const convertImageToLatex = async (base64Images: string[]): Promise<strin
   }));
 
   const response: GenerateContentResponse = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3-pro-preview',
     contents: [
       {
         parts: [
